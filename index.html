@@ -1,0 +1,1291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QUANTUM NEXUS PREDICTOR v5.0</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --quantum-blue: #00f7ff;
+            --neon-purple: #b300ff;
+            --matrix-green: #00ff88;
+            --ai-orange: #ff7b00;
+            --dark-void: #0a0a12;
+            --hud-glass: rgba(15, 25, 45, 0.7);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Rajdhani', 'Orbitron', sans-serif;
+        }
+
+        body {
+            background: var(--dark-void);
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(0, 247, 255, 0.03) 0%, transparent 30%),
+                radial-gradient(circle at 80% 70%, rgba(179, 0, 255, 0.03) 0%, transparent 30%);
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            border-radius: 16px;
+            padding: 25px;
+            position: relative;
+            overflow: hidden;
+            background: var(--hud-glass);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(0, 247, 255, 0.1);
+            box-shadow: 0 0 30px rgba(0, 247, 255, 0.1),
+                        inset 0 0 20px rgba(0, 247, 255, 0.05);
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 16px;
+            background: linear-gradient(135deg, 
+                      rgba(0, 247, 255, 0.1) 0%, 
+                      rgba(179, 0, 255, 0.1) 50%, 
+                      rgba(255, 123, 0, 0.1) 100%);
+            z-index: -1;
+            animation: hologram 8s linear infinite;
+        }
+
+        @keyframes hologram {
+            0% { opacity: 0.3; }
+            50% { opacity: 0.1; }
+            100% { opacity: 0.3; }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+            position: relative;
+            padding-bottom: 15px;
+        }
+
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 25%;
+            right: 25%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--quantum-blue), transparent);
+        }
+
+        .header h1 {
+            color: var(--quantum-blue);
+            font-size: 2rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+            text-shadow: 0 0 15px var(--quantum-blue);
+            position: relative;
+            display: inline-block;
+        }
+
+        .header h1::after {
+            content: 'v5.0';
+            position: absolute;
+            top: -10px;
+            right: -40px;
+            font-size: 0.8rem;
+            color: var(--ai-orange);
+            text-shadow: 0 0 5px var(--ai-orange);
+        }
+
+        .header p {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+        }
+
+        /* Settings Icon Styles */
+        .settings-icon {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: var(--quantum-blue);
+            cursor: pointer;
+            font-size: 1.2rem;
+            z-index: 10;
+            transition: transform 0.3s;
+        }
+
+        .settings-icon:hover {
+            transform: rotate(90deg);
+        }
+
+        .settings-dropdown {
+            display: none;
+            position: absolute;
+            right: 0;
+            background: var(--hud-glass);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(0, 247, 255, 0.2);
+            border-radius: 8px;
+            padding: 10px;
+            min-width: 180px;
+            z-index: 20;
+            box-shadow: 0 0 15px rgba(0, 247, 255, 0.2);
+        }
+
+        .model-option {
+            padding: 8px 12px;
+            border-radius: 4px;
+            margin: 4px 0;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .model-option:hover {
+            background: rgba(0, 247, 255, 0.1);
+        }
+
+        .model-option.active {
+            background: var(--quantum-blue);
+            color: var(--dark-void);
+            font-weight: bold;
+        }
+
+        .prediction-display {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(0, 247, 255, 0.2);
+        }
+
+        .prediction-display::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            right: -50%;
+            bottom: -50%;
+            background: linear-gradient(
+                to bottom right,
+                rgba(0, 247, 255, 0.05) 0%,
+                rgba(179, 0, 255, 0.05) 100%
+            );
+            transform: rotate(30deg);
+            z-index: -1;
+        }
+
+        .timer {
+            font-size: 2.2rem;
+            font-family: 'Orbitron', sans-serif;
+            color: var(--quantum-blue);
+            margin-bottom: 15px;
+            text-align: center;
+            letter-spacing: 3px;
+            position: relative;
+        }
+
+        .timer::before {
+            content: 'NEXT PREDICTION IN';
+            position: absolute;
+            top: -18px;
+            left: 0;
+            right: 0;
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.6);
+            letter-spacing: 1px;
+        }
+
+        .current-period {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.8);
+            padding-bottom: 10px;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
+        }
+
+        .prediction-result {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            position: relative;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(0, 247, 255, 0.2);
+        }
+
+        .prediction-big {
+            color: var(--quantum-blue);
+            text-shadow: 0 0 15px var(--quantum-blue);
+            border-color: var(--quantum-blue);
+        }
+
+        .prediction-small {
+            color: var(--neon-purple);
+            text-shadow: 0 0 15px var(--neon-purple);
+            border-color: var(--neon-purple);
+        }
+
+        .confidence-container {
+            margin: 20px 0;
+        }
+
+        .confidence-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .confidence-meter {
+            height: 12px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+            border: 1px solid rgba(0, 247, 255, 0.1);
+        }
+
+        .confidence-level {
+            height: 100%;
+            background: linear-gradient(90deg, var(--neon-purple), var(--quantum-blue));
+            width: 50%;
+            border-radius: 6px;
+            transition: width 0.5s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .confidence-level::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(
+                90deg,
+                rgba(255, 255, 255, 0.3) 0%,
+                rgba(255, 255, 255, 0) 50%,
+                rgba(255, 255, 255, 0.3) 100%
+            );
+            animation: shine 2s infinite;
+        }
+
+        @keyframes shine {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin: 25px 0;
+            gap: 10px;
+        }
+
+        .stat-box {
+            text-align: center;
+            padding: 15px 10px;
+            border-radius: 10px;
+            flex: 1;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(0, 247, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--quantum-blue);
+        }
+
+        .stat-box.win::before {
+            background: var(--matrix-green);
+        }
+
+        .stat-box.lose::before {
+            background: #ff3a3a;
+        }
+
+        .stat-box .stat-label {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 5px;
+        }
+
+        .stat-box .stat-value {
+            font-size: 1.3rem;
+            font-weight: bold;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .win .stat-value {
+            color: var(--matrix-green);
+            text-shadow: 0 0 8px rgba(0, 255, 136, 0.5);
+        }
+
+        .lose .stat-value {
+            color: #ff3a3a;
+            text-shadow: 0 0 8px rgba(255, 58, 58, 0.5);
+        }
+
+        .accuracy .stat-value {
+            color: var(--quantum-blue);
+            text-shadow: 0 0 8px rgba(0, 247, 255, 0.5);
+        }
+
+        .history-container {
+            margin-top: 25px;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            color: var(--quantum-blue);
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(0, 247, 255, 0.2);
+        }
+
+        .history-list {
+            border-radius: 10px;
+            overflow: hidden;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(0, 247, 255, 0.1);
+        }
+
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 15px;
+            border-bottom: 1px solid rgba(0, 247, 255, 0.05);
+            font-size: 0.9rem;
+            align-items: center;
+            transition: background 0.3s;
+        }
+
+        .history-item:last-child {
+            border-bottom: none;
+        }
+
+        .history-item:hover {
+            background: rgba(0, 247, 255, 0.05);
+        }
+
+        .history-period {
+            color: rgba(255, 255, 255, 0.8);
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .history-result {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .history-number {
+            font-weight: bold;
+        }
+
+        .history-big {
+            color: var(--quantum-blue);
+        }
+
+        .history-small {
+            color: var(--neon-purple);
+        }
+
+        .history-outcome {
+            font-size: 0.8rem;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
+        .history-win {
+            background: rgba(0, 255, 136, 0.2);
+            color: var(--matrix-green);
+        }
+
+        .history-lose {
+            background: rgba(255, 58, 58, 0.2);
+            color: #ff3a3a;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 30px;
+            color: var(--quantum-blue);
+            font-size: 0.9rem;
+        }
+
+        .loading i {
+            margin-right: 8px;
+        }
+
+        .error-message {
+            color: #ff3a3a;
+            text-align: center;
+            padding: 10px;
+            font-size: 0.9rem;
+            background: rgba(255, 58, 58, 0.1);
+            border-radius: 6px;
+            margin: 10px 0;
+            display: none;
+        }
+
+        .ai-processing {
+            position: absolute;
+            bottom: -10px;
+            right: 15px;
+            font-size: 0.7rem;
+            color: var(--ai-orange);
+            opacity: 0.7;
+        }
+
+        .pulse {
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+
+        /* Terminal-like effect for status updates */
+        .status-update {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid var(--quantum-blue);
+            border-radius: 8px;
+            padding: 10px 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            color: var(--matrix-green);
+            display: none;
+            z-index: 100;
+            box-shadow: 0 0 20px rgba(0, 247, 255, 0.2);
+        }
+
+        .status-update::before {
+            content: '> ';
+            color: var(--quantum-blue);
+        }
+
+        /* Model indicator */
+        .model-indicator {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 0.8rem;
+            color: var(--ai-orange);
+            background: rgba(255, 123, 0, 0.1);
+            padding: 2px 8px;
+            border-radius: 10px;
+            border: 1px solid var(--ai-orange);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 480px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .timer {
+                font-size: 1.8rem;
+            }
+            
+            .prediction-result {
+                font-size: 1.5rem;
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Settings Icon -->
+        <div class="settings-icon" id="settings-icon">
+            <i class="fas fa-cog"></i>
+            <div class="settings-dropdown" id="settings-dropdown">
+                <div class="model-option" data-model="hybrid">Hybrid Model</div>
+                <div class="model-option" data-model="streak">Streak Model</div>
+                <div class="model-option" data-model="trend">Trend Model</div>
+                <div class="model-option" data-model="random">Random Model</div>
+                <div class="model-option" data-model="auto">Auto Switch</div>
+            </div>
+        </div>
+
+        <!-- Model Indicator -->
+        <div class="model-indicator" id="model-indicator">Model: Hybrid</div>
+
+        <div class="header">
+            <h1>QUANTUM NEXUS</h1>
+            <p>Advanced Pattern Recognition Engine</p>
+        </div>
+
+        <div class="error-message" id="error-message"></div>
+
+        <div class="prediction-display">
+            <div class="timer" id="countdown">00:00</div>
+            
+            <div class="current-period">
+                <span>Current Period:</span>
+                <span id="current-period">Initializing...</span>
+            </div>
+
+            <div class="prediction-result" id="prediction-result">
+                <i class="fas fa-brain fa-pulse"></i> AI Processing...
+                <span class="ai-processing">QuantumNet v5.0 analyzing</span>
+            </div>
+
+            <div class="confidence-container">
+                <div class="confidence-header">
+                    <span>AI Confidence Level</span>
+                    <span id="confidence-text">0%</span>
+                </div>
+                <div class="confidence-meter">
+                    <div class="confidence-level" id="confidence-level"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats">
+            <div class="stat-box win">
+                <div class="stat-label">WINS</div>
+                <div class="stat-value" id="win-count">0</div>
+            </div>
+            <div class="stat-box lose">
+                <div class="stat-label">LOSSES</div>
+                <div class="stat-value" id="lose-count">0</div>
+            </div>
+            <div class="stat-box accuracy">
+                <div class="stat-label">ACCURACY</div>
+                <div class="stat-value" id="accuracy">0%</div>
+            </div>
+        </div>
+
+        <div class="history-container">
+            <div class="history-header">
+                <span>LAST 10 PREDICTIONS</span>
+                <span id="last-updated">Synced: Just now</span>
+            </div>
+            
+            <div class="history-list" id="history-list">
+                <div class="loading">
+                    <i class="fas fa-sync-alt fa-spin"></i> Loading quantum data matrix...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="status-update" id="status-update"></div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
+
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCf8bovt6LQ3-mSulfiwEWP8ewRJfFHm8g",
+            authDomain: "web-admin-e297c.firebaseapp.com",
+            databaseURL: "https://web-admin-e297c-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "web-admin-e297c",
+            storageBucket: "web-admin-e297c.firebasestorage.app",
+            messagingSenderId: "736632237934",
+            appId: "1:736632237934:web:f043141bcca9036ad65b7f"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Generate unique device ID
+        const deviceId = 'device_' + Math.random().toString(36).substr(2, 9);
+        
+        // Quantum Nexus Engine v5.0
+        const quantumEngine = {
+            state: {
+                currentPeriod: null,
+                prediction: null,
+                history: [],
+                wins: 0,
+                losses: 0,
+                accuracy: 0,
+                countdownInterval: null,
+                lastUpdateTime: null,
+                lastPrediction: null,
+                retryCount: 0,
+                activeModel: 'hybrid',
+                deviceId: deviceId,
+                isMasterDevice: false
+            },
+            
+            elements: {
+                countdown: document.getElementById('countdown'),
+                currentPeriod: document.getElementById('current-period'),
+                predictionResult: document.getElementById('prediction-result'),
+                confidenceLevel: document.getElementById('confidence-level'),
+                confidenceText: document.getElementById('confidence-text'),
+                winCount: document.getElementById('win-count'),
+                loseCount: document.getElementById('lose-count'),
+                accuracy: document.getElementById('accuracy'),
+                lastUpdated: document.getElementById('last-updated'),
+                historyList: document.getElementById('history-list'),
+                errorMessage: document.getElementById('error-message'),
+                statusUpdate: document.getElementById('status-update'),
+                settingsIcon: document.getElementById('settings-icon'),
+                settingsDropdown: document.getElementById('settings-dropdown'),
+                modelIndicator: document.getElementById('model-indicator')
+            },
+            
+            init() {
+                this.showStatus("Quantum Nexus Engine initializing...");
+                
+                // Initialize Firebase listeners
+                this.initFirebase();
+                
+                // Start countdown
+                this.startCountdown();
+                
+                // Fetch initial game data
+                this.fetchGameData();
+                
+                // Setup settings dropdown
+                this.setupSettings();
+                
+                // Keep alive in background
+                if ('wakeLock' in navigator) {
+                    navigator.wakeLock.request('screen').catch(err => {
+                        this.showStatus("Wake Lock not supported: " + err.message);
+                    });
+                }
+                
+                // Auto-retry every 5 minutes if connection fails
+                setInterval(() => {
+                    if (this.state.retryCount > 2) {
+                        this.fetchGameData();
+                    }
+                }, 300000);
+            },
+            
+            initFirebase() {
+                // Listen for model changes
+                const modelRef = database.ref('quantum_predictor/settings/activeModel');
+                modelRef.on('value', (snapshot) => {
+                    const newModel = snapshot.val();
+                    if (newModel && newModel !== this.state.activeModel) {
+                        this.state.activeModel = newModel;
+                        this.updateModelIndicator();
+                        this.showStatus(`Model changed to: ${newModel}`);
+                        
+                        // Re-run prediction with new model
+                        if (this.state.history.length > 0) {
+                            this.makeAndDisplayPrediction();
+                        }
+                    }
+                });
+                
+                // Register this device
+                this.registerDevice();
+                
+                // Check if this device should be master
+                this.checkMasterDevice();
+            },
+            
+            registerDevice() {
+                const deviceRef = database.ref(`quantum_predictor/devices/${this.state.deviceId}`);
+                deviceRef.set({
+                    lastActive: Date.now(),
+                    activeModel: this.state.activeModel
+                });
+                
+                // Update last active every minute
+                setInterval(() => {
+                    deviceRef.update({
+                        lastActive: Date.now()
+                    });
+                }, 60000);
+            },
+            
+            checkMasterDevice() {
+                const devicesRef = database.ref('quantum_predictor/devices');
+                devicesRef.once('value').then((snapshot) => {
+                    const devices = snapshot.val() || {};
+                    const deviceCount = Object.keys(devices).length;
+                    
+                    // If this is the only device or first to connect, make it master
+                    if (deviceCount <= 1) {
+                        this.state.isMasterDevice = true;
+                        this.showStatus("This device is now master controller");
+                    }
+                });
+            },
+            
+            setupSettings() {
+                // Toggle settings dropdown
+                this.elements.settingsIcon.addEventListener('click', () => {
+                    const isVisible = this.elements.settingsDropdown.style.display === 'block';
+                    this.elements.settingsDropdown.style.display = isVisible ? 'none' : 'block';
+                    
+                    // Highlight current active model
+                    const options = this.elements.settingsDropdown.querySelectorAll('.model-option');
+                    options.forEach(option => {
+                        option.classList.remove('active');
+                        if (option.dataset.model === this.state.activeModel) {
+                            option.classList.add('active');
+                        }
+                    });
+                });
+                
+                // Handle model selection
+                const options = this.elements.settingsDropdown.querySelectorAll('.model-option');
+                options.forEach(option => {
+                    option.addEventListener('click', () => {
+                        const selectedModel = option.dataset.model;
+                        this.changeModel(selectedModel);
+                        this.elements.settingsDropdown.style.display = 'none';
+                    });
+                });
+            },
+            
+            changeModel(newModel) {
+                if (this.state.activeModel === newModel) return;
+                
+                // Update in Firebase (only master device can change model for all)
+                if (this.state.isMasterDevice) {
+                    database.ref('quantum_predictor/settings').update({
+                        activeModel: newModel,
+                        lastChangedBy: this.state.deviceId,
+                        lastChangedAt: Date.now()
+                    });
+                } else {
+                    // Non-master devices can only change their local model
+                    this.state.activeModel = newModel;
+                    this.updateModelIndicator();
+                    this.showStatus(`Local model changed to: ${newModel}`);
+                    
+                    // Update device record
+                    database.ref(`quantum_predictor/devices/${this.state.deviceId}`).update({
+                        activeModel: newModel
+                    });
+                }
+            },
+            
+            updateModelIndicator() {
+                this.elements.modelIndicator.textContent = `Model: ${this.state.activeModel.charAt(0).toUpperCase() + this.state.activeModel.slice(1)}`;
+            },
+            
+            showStatus(message) {
+                this.elements.statusUpdate.textContent = message;
+                this.elements.statusUpdate.style.display = 'block';
+                setTimeout(() => {
+                    this.elements.statusUpdate.style.display = 'none';
+                }, 3000);
+            },
+            
+            showError(message) {
+                this.elements.errorMessage.textContent = message;
+                this.elements.errorMessage.style.display = 'block';
+                setTimeout(() => {
+                    this.elements.errorMessage.style.display = 'none';
+                }, 5000);
+            },
+            
+            startCountdown() {
+                clearInterval(this.state.countdownInterval);
+                
+                const now = new Date();
+                const currentSeconds = now.getSeconds();
+                let countdown = 60 - currentSeconds;
+                
+                this.updateCountdownDisplay(countdown);
+                
+                this.state.countdownInterval = setInterval(() => {
+                    countdown--;
+                    if (countdown < 0) countdown = 59;
+                    this.updateCountdownDisplay(countdown);
+                    
+                    if (countdown === 59) {
+                        this.showStatus("Synchronizing with quantum network...");
+                        this.fetchGameData();
+                    }
+                }, 1000);
+            },
+            
+            updateCountdownDisplay(seconds) {
+                const formatted = seconds.toString().padStart(2, '0');
+                this.elements.countdown.textContent = `00:${formatted}`;
+                
+                if (seconds <= 10) {
+                    this.elements.countdown.style.color = 'var(--ai-orange)';
+                    this.elements.countdown.style.textShadow = '0 0 10px var(--ai-orange)';
+                } else {
+                    this.elements.countdown.style.color = 'var(--quantum-blue)';
+                    this.elements.countdown.style.textShadow = '0 0 10px var(--quantum-blue)';
+                }
+            },
+            
+            async fetchGameData() {
+                try {
+                    this.elements.predictionResult.innerHTML = '<i class="fas fa-brain fa-pulse"></i> AI Processing...<span class="ai-processing">QuantumNet v5.0 analyzing</span>';
+                    this.state.retryCount = 0;
+                    
+                    // Fetch current game issue
+                    const currentIssue = await this.fetchCurrentIssue();
+                    if (!currentIssue) {
+                        this.showError("Quantum network unstable - retrying...");
+                        this.state.retryCount++;
+                        setTimeout(() => this.fetchGameData(), 5000);
+                        return;
+                    }
+                    
+                    this.state.currentPeriod = currentIssue.issueNumber;
+                    this.elements.currentPeriod.textContent = this.state.currentPeriod;
+                    
+                    // Fetch previous results
+                    await this.fetchPreviousResults();
+                    
+                    // Make and display prediction
+                    this.makeAndDisplayPrediction();
+                    
+                    // Update timestamp
+                    const now = new Date();
+                    this.state.lastUpdateTime = now;
+                    this.elements.lastUpdated.textContent = `Synced: ${now.toLocaleTimeString()}`;
+                    
+                } catch (error) {
+                    console.error('Quantum sync error:', error);
+                    this.showError(`API Error: ${error.message || 'Unknown error'}`);
+                    this.state.retryCount++;
+                    setTimeout(() => this.fetchGameData(), 5000);
+                }
+            },
+            
+            makeAndDisplayPrediction() {
+                if (this.state.history.length > 0) {
+                    const prediction = this.analyzePatterns(this.state.history);
+                    this.state.prediction = prediction;
+                    this.displayPrediction(prediction);
+                    
+                    // Check last result if it was a win
+                    this.checkPredictionResult();
+                }
+            },
+            
+            async fetchCurrentIssue() {
+                const apiUrl = 'https://api.bdg88zf.com/api/webapi/GetGameIssue';
+                const requestData = {
+                    "typeId": 1,
+                    "language": 0,
+                    "random": "40079dcba93a48769c6ee9d4d4fae23f",
+                    "signature": "D12108C4F57C549D82B23A91E0FA20AE",
+                    "timestamp": Math.floor(Date.now() / 1000)
+                };
+
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json;charset=UTF-8',
+                            'Accept': 'application/json, text/plain, */*'
+                        },
+                        body: JSON.stringify(requestData)
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.code === 0) {
+                            return data.data;
+                        } else {
+                            throw new Error("API response error");
+                        }
+                    }
+                    throw new Error("Network response not OK");
+                } catch (error) {
+                    throw error;
+                }
+            },
+            
+            async fetchPreviousResults() {
+                const apiUrl = 'https://api.bdg88zf.com/api/webapi/GetNoaverageEmerdList';
+                const requestData = {
+                    "pageSize": 10,
+                    "pageNo": 1,
+                    "typeId": 1,
+                    "language": 0,
+                    "random": "c2505d9138da4e3780b2c2b34f2fb789",
+                    "signature": "7D637E060DA35C0C6E28DC6D23D71BED",
+                    "timestamp": Math.floor(Date.now() / 1000)
+                };
+
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json;charset=UTF-8',
+                            'Accept': 'application/json, text/plain, */*'
+                        },
+                        body: JSON.stringify(requestData)
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.code === 0) {
+                            this.state.history = data.data.list.map(item => ({
+                                issueNumber: item.issueNumber,
+                                number: item.number,
+                                color: item.color
+                            }));
+                            this.updateHistoryDisplay();
+                        } else {
+                            throw new Error("Historical data unavailable");
+                        }
+                    } else {
+                        throw new Error("Network response not OK");
+                    }
+                } catch (error) {
+                    throw error;
+                }
+            },
+            
+            analyzePatterns(history) {
+                if (history.length < 5) return this.randomPrediction();
+                
+                // Get last 10 results
+                const lastResults = history.slice(0, 10).map(r => r.number);
+                
+                // Run analysis based on active model
+                switch(this.state.activeModel) {
+                    case 'streak':
+                        return this.streakModel(lastResults);
+                    case 'trend':
+                        return this.trendModel(lastResults);
+                    case 'random':
+                        return this.randomPrediction();
+                    case 'auto':
+                        return this.autoSwitchModel(lastResults);
+                    case 'hybrid':
+                    default:
+                        return this.hybridModel(lastResults);
+                }
+            },
+            
+            hybridModel(numbers) {
+                const analysis = {
+                    bigCount: numbers.filter(n => n > 4).length,
+                    smallCount: numbers.filter(n => n <= 4).length,
+                    streaks: this.detectStreaks(numbers),
+                    alternations: this.countAlternations(numbers),
+                    recentTrend: this.calculateTrend(numbers.slice(0, 5))
+                };
+
+                let prediction = { type: null, confidence: 50, reasoning: [] };
+                
+                // 1. Streak breaking with trend consideration
+                if (analysis.streaks.big >= 3) {
+                    prediction.type = 'small';
+                    prediction.confidence += analysis.recentTrend === 'falling' ? 25 : 15;
+                    prediction.reasoning.push(`Breaking BIG streak (${analysis.streaks.big})`);
+                } 
+                else if (analysis.streaks.small >= 3) {
+                    prediction.type = 'big';
+                    prediction.confidence += analysis.recentTrend === 'rising' ? 25 : 15;
+                    prediction.reasoning.push(`Breaking SMALL streak (${analysis.streaks.small})`);
+                }
+                
+                // 2. Balanced distribution with alternation check
+                else if (analysis.bigCount >= 7) {
+                    prediction.type = 'small';
+                    prediction.confidence += analysis.alternations < 5 ? 20 : 10;
+                    prediction.reasoning.push(`Balance (${analysis.bigCount}/10 BIG)`);
+                }
+                else if (analysis.smallCount >= 7) {
+                    prediction.type = 'big';
+                    prediction.confidence += analysis.alternations < 5 ? 20 : 10;
+                    prediction.reasoning.push(`Balance (${analysis.smallCount}/10 SMALL)`);
+                }
+                
+                // 3. Alternation pattern with trend confirmation
+                else if (analysis.alternations >= 7) {
+                    const likelyType = analysis.bigCount > analysis.smallCount ? 'big' : 'small';
+                    prediction.type = likelyType;
+                    prediction.confidence += 15;
+                    prediction.reasoning.push(`High alternation (${analysis.alternations}/9)`);
+                }
+                
+                // 4. Trend following strategy
+                else if (analysis.recentTrend === 'rising' && analysis.bigCount < 6) {
+                    prediction.type = 'big';
+                    prediction.confidence += 10;
+                    prediction.reasoning.push(`Following rising trend`);
+                }
+                else if (analysis.recentTrend === 'falling' && analysis.smallCount < 6) {
+                    prediction.type = 'small';
+                    prediction.confidence += 10;
+                    prediction.reasoning.push(`Following falling trend`);
+                }
+                
+                // If no clear pattern, use random with slight bias
+                if (prediction.type === null) {
+                    return this.randomPrediction();
+                }
+                
+                // Cap confidence between 55-85%
+                prediction.confidence = Math.max(55, Math.min(85, prediction.confidence));
+                
+                return prediction;
+            },
+            
+            streakModel(numbers) {
+                const streaks = this.detectStreaks(numbers);
+                let prediction = { type: null, confidence: 60, reasoning: [] };
+                
+                if (streaks.big >= 2) {
+                    prediction.type = 'small';
+                    prediction.confidence += streaks.big * 5;
+                    prediction.reasoning.push(`Streak Model: BIG streak (${streaks.big})`);
+                } 
+                else if (streaks.small >= 2) {
+                    prediction.type = 'big';
+                    prediction.confidence += streaks.small * 5;
+                    prediction.reasoning.push(`Streak Model: SMALL streak (${streaks.small})`);
+                }
+                else {
+                    return this.randomPrediction();
+                }
+                
+                return prediction;
+            },
+            
+            trendModel(numbers) {
+                const trend = this.calculateTrend(numbers.slice(0, 5));
+                let prediction = { type: null, confidence: 65, reasoning: [] };
+                
+                if (trend === 'rising') {
+                    prediction.type = 'big';
+                    prediction.reasoning.push(`Trend Model: Rising trend`);
+                } 
+                else if (trend === 'falling') {
+                    prediction.type = 'small';
+                    prediction.reasoning.push(`Trend Model: Falling trend`);
+                }
+                else {
+                    return this.randomPrediction();
+                }
+                
+                return prediction;
+            },
+            
+            autoSwitchModel(numbers) {
+                // Analyze performance of each model in recent history
+                // This is simplified - in real implementation you'd track actual performance
+                const streaks = this.detectStreaks(numbers);
+                const trend = this.calculateTrend(numbers.slice(0, 5));
+                
+                if (streaks.big >= 3 || streaks.small >= 3) {
+                    return this.streakModel(numbers);
+                } 
+                else if (trend !== 'neutral') {
+                    return this.trendModel(numbers);
+                }
+                else {
+                    return this.hybridModel(numbers);
+                }
+            },
+            
+            detectStreaks(numbers) {
+                let streaks = { big: 0, small: 0 };
+                let currentStreak = 1;
+                let currentType = numbers[0] > 4 ? 'big' : 'small';
+
+                for (let i = 1; i < numbers.length; i++) {
+                    const type = numbers[i] > 4 ? 'big' : 'small';
+                    if (type === currentType) {
+                        currentStreak++;
+                    } else {
+                        if (currentStreak > streaks[currentType]) {
+                            streaks[currentType] = currentStreak;
+                        }
+                        currentStreak = 1;
+                        currentType = type;
+                    }
+                }
+
+                if (currentStreak > streaks[currentType]) {
+                    streaks[currentType] = currentStreak;
+                }
+
+                return streaks;
+            },
+            
+            countAlternations(numbers) {
+                let alternations = 0;
+                for (let i = 1; i < numbers.length; i++) {
+                    const prevType = numbers[i-1] > 4 ? 'big' : 'small';
+                    const currType = numbers[i] > 4 ? 'big' : 'small';
+                    if (prevType !== currType) alternations++;
+                }
+                return alternations;
+            },
+            
+            calculateTrend(numbers) {
+                if (numbers.length < 2) return 'neutral';
+                
+                let changes = [];
+                for (let i = 1; i < numbers.length; i++) {
+                    changes.push(numbers[i] - numbers[i-1]);
+                }
+                
+                const avgChange = changes.reduce((a, b) => a + b, 0) / changes.length;
+                
+                if (avgChange > 1) return 'rising';
+                if (avgChange < -1) return 'falling';
+                return 'neutral';
+            },
+            
+            randomPrediction() {
+                return Math.random() > 0.5 
+                    ? { type: 'big', confidence: 55, reasoning: ['Quantum fluctuation pattern'] }
+                    : { type: 'small', confidence: 55, reasoning: ['Quantum fluctuation pattern'] };
+            },
+            
+            displayPrediction(prediction) {
+                this.elements.predictionResult.textContent = prediction.type.toUpperCase();
+                this.elements.predictionResult.className = `prediction-result prediction-${prediction.type}`;
+                
+                this.elements.confidenceLevel.style.width = `${prediction.confidence}%`;
+                this.elements.confidenceText.textContent = `${prediction.confidence}%`;
+                
+                // Show reasoning in status
+                if (prediction.reasoning.length > 0) {
+                    this.showStatus(`AI Decision (${this.state.activeModel}): ${prediction.reasoning.join(', ')}`);
+                }
+            },
+            
+            checkPredictionResult() {
+                if (!this.state.prediction || this.state.history.length === 0) return;
+                
+                const lastResult = this.state.history[0];
+                const actualType = lastResult.number > 4 ? 'big' : 'small';
+                
+                if (this.state.lastPrediction) {
+                    const wasCorrect = this.state.lastPrediction.type === actualType;
+                    
+                    if (wasCorrect) {
+                        this.state.wins++;
+                        this.showStatus("Quantum prediction confirmed! Pattern recognized.");
+                    } else {
+                        this.state.losses++;
+                        this.showStatus("Prediction variance detected. Recalibrating...");
+                    }
+                    
+                    this.state.accuracy = Math.round((this.state.wins / (this.state.wins + this.state.losses)) * 100);
+                    
+                    this.elements.winCount.textContent = this.state.wins;
+                    this.elements.loseCount.textContent = this.state.losses;
+                    this.elements.accuracy.textContent = isNaN(this.state.accuracy) ? '0%' : `${this.state.accuracy}%`;
+                    
+                    this.updateHistoryDisplay();
+                    
+                    // If using auto model, track performance for switching
+                    if (this.state.activeModel === 'auto') {
+                        this.trackModelPerformance(wasCorrect);
+                    }
+                }
+                
+                this.state.lastPrediction = this.state.prediction;
+            },
+            
+            trackModelPerformance(wasCorrect) {
+                // In a full implementation, you would track which model made the prediction
+                // and its success rate to inform auto-switching decisions
+                // This is simplified for the example
+                if (!wasCorrect) {
+                    this.showStatus("Auto Model: Considering strategy adjustment...");
+                }
+            },
+            
+            updateHistoryDisplay() {
+                if (this.state.history.length === 0) {
+                    this.elements.historyList.innerHTML = '<div class="history-item">Quantum data stream unavailable</div>';
+                    return;
+                }
+                
+                let html = '';
+                
+                this.state.history.forEach((result, index) => {
+                    const isBig = result.number > 4;
+                    const type = isBig ? 'BIG' : 'SMALL';
+                    const typeClass = isBig ? 'history-big' : 'history-small';
+                    
+                    let outcomeClass = '';
+                    let outcomeText = '';
+                    
+                    if (index === 0 && this.state.lastPrediction) {
+                        const predictedCorrectly = this.state.lastPrediction.type === type.toLowerCase();
+                        outcomeClass = predictedCorrectly ? 'history-win' : 'history-lose';
+                        outcomeText = predictedCorrectly ? 'WIN' : 'LOSE';
+                    }
+                    
+                    html += `
+                        <div class="history-item">
+                            <span class="history-period">#${result.issueNumber}</span>
+                            <div class="history-result">
+                                <span class="history-number ${typeClass}">${type} (${result.number})</span>
+                                ${outcomeText ? `<span class="history-outcome ${outcomeClass}">${outcomeText}</span>` : ''}
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                this.elements.historyList.innerHTML = html;
+            }
+        };
+
+        // Initialize Quantum Nexus Engine
+        document.addEventListener('DOMContentLoaded', () => {
+            quantumEngine.init();
+        });
+    </script>
+</body>
+</html>
